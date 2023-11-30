@@ -74,6 +74,7 @@ const createImage = (src) => {
 
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     imageBase64.value = canvas.toDataURL('image/jpeg', 0.8); // 第二个参数是图片质量，范围从 0 到 1);
+    console.log(imageBase64.value);
   };
   img.src = src;
 };

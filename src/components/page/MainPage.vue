@@ -8,8 +8,8 @@
       </div>
 
       <div class="ad-container">
-        <div class="ad-card" v-for="ad in displayedAds" :key="ad.adId">
-          <img v-if="ad.pictures.length > 0" :src="ad.pictures[0].path" alt="Ad Image">
+        <div class="ad-card" v-for="ad in displayedAds" :key="ad.ad_id">
+          <img v-if="ad.pictures && ad.pictures.length > 0" :src="ad.pictures[0]" alt="Ad Image">
           <h3>{{ ad.title }}</h3>
           <p>{{ ad.address }}</p>
           <p>{{ ad.description }}</p>
@@ -17,7 +17,10 @@
         </div>
       </div>
 
-      <button v-if="hasMoreAds" @click="nextPage">Next Page</button>
+      <div class="pagination-buttons">
+        <button v-if="hasLessAds" @click="previousPage" class="page-button"> &lt; </button>
+        <button v-if="hasMoreAds" @click="nextPage" class="page-button"> &gt; </button>
+      </div>
     </div>
 
     <Footer />
@@ -43,27 +46,60 @@ const hasMoreAds = computed(() => {
   return ads.value.length > currentPage.value * pageSize;
 });
 
-onMounted(() => {
-  fetchAds();
+const hasLessAds = computed(() => {
+  return currentPage.value > 1
 });
 
-const fetchAds = () => {
-  const userId = 1;
-  axios.get(`http://192.168.1.109:8091/ads/get?user_id=${userId}`)
-      .then((resp) => {
-        ads.value = resp.data.obj;
-        console.log(resp)
-      })
-      .catch((err) => {
-        console.error(err);
+
+onMounted(() => {
+  fetchAds();
+  
+});
+
+const fetchAds = async () => {
+  try {
+    const response = await axios.get('http://192.168.1.109:8091/ads/home');
+    if (response.status === 200) {
+      ads.value = response.data.obj;
+      ads.value.forEach((ad) => {
+        fetchPicturesForAd(ad.adId);
       });
+    }
+  } catch (error) {
+    console.error('Error fetching ads:', error);
+  }
 };
+
+const fetchPicturesForAd = async (adId) => {
+  try {
+    const url = `http://192.168.1.109:8091/picture/get/first?ad_id=${adId}`;
+    const response = await axios.get(url);
+    if (response.status === 200 && response.data && response.data.obj) {
+      const adIndex = ads.value.findIndex(ad => ad.adId === adId);
+      if (adIndex !== -1) {
+        ads.value[adIndex].pictures = [response.data.obj.pictureBase64];
+      }
+    }
+  } catch (error) {
+    console.error(`Error fetching picture for ad ${adId}:`, error);
+  }
+};
+
+
+
 
 const nextPage = () => {
   if (hasMoreAds.value) {
     currentPage.value++;
   }
 };
+
+const previousPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
 </script>
 
 
@@ -73,7 +109,7 @@ const nextPage = () => {
   flex-direction: column;
   align-items: center;
   padding: 10px;
-  //min-height: 100vh; /* 设置最小高度为视口高度 */
+  min-height: 100vh; /* 设置最小高度为视口高度 */
   flex-grow: 1;
 }
 
@@ -124,4 +160,32 @@ const nextPage = () => {
   background-color: #3fbac2;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+.page-button {
+  background-color: #4CAF50; /* 绿色背景 */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  margin: 5px;
+  border-radius: 50%; /* 圆形按钮 */
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  width: 30px; /* 按钮宽度 */
+  height: 30px; /* 按钮高度 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-button:hover {
+  background-color: #45a049;
+}
+
+.pagination-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 </style>

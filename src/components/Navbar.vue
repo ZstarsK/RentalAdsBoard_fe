@@ -29,6 +29,8 @@
   align-items: center;
   padding: 0 10px;
   height: 35px;
+  position: sticky;
+  top: 0;
 }
 .navbar a.button {
   color: white;

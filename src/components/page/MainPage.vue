@@ -1,7 +1,6 @@
 ﻿<template>
   <div class="main-container">
     <Navbar />
-
     <div class="content">
       <div class="search-bar-container">
         <input type="text" class="search-bar" placeholder="Search ads...">
@@ -14,8 +13,8 @@
           <p>{{ ad.address }}</p>
           <p>{{ ad.description }}</p>
           <button class="action-button" @click="viewDetail(ad.adId)">View Details</button>
-          <div v-if="ad.userId.toString() === userId" class="editor">
-            <i class="bi bi-trash-fill" @click="deleteAd(ad.adId,ad.userId)" style="margin: 0 10px"></i>
+          <div v-if="userRole == 2 || ad.username === userName" class="editor">
+            <i class="bi bi-trash-fill" @click="deleteAd(ad.adId)" style="margin: 0 10px"></i>
             <i class="bi bi-pencil-square" @click="editorDetail(ad.adId)" style="margin: 0 10px"></i>
           </div>
         </div>
@@ -39,8 +38,10 @@ import {useRouter} from "vue-router";
 const ads = ref([]);
 const currentPage = ref(1);
 const pageSize = 5;
+const userName = localStorage.getItem('userName');
 
-const userId = localStorage.getItem("userId");
+const userRole = ref(0);
+//const userId = localStorage.getItem("userId");
 
 
 const displayedAds = computed(() => {
@@ -66,13 +67,13 @@ const editorDetail = (adId) => {
   router.push({ name: 'AdPost', query: { ad_id: adId } });
 }
 
-
 onMounted(() => {
-  if (!localStorage.getItem("userId")){
+  if (!localStorage.getItem("token")){
     router.push("/login")
     alert("Please login first!!!")
     
   }else {
+    userRole.value = parseInt(localStorage.getItem('role'));
     fetchAds();
   }
   
@@ -80,7 +81,11 @@ onMounted(() => {
 
 const fetchAds = async () => {
   try {
-    const response = await axios.get('http://192.168.1.109:8091/ads/home');
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: localStorage.getItem('token')
+    }
+    const response = await axios.get('http://localhost:8091/ads/home',{headers});
     if (response.status === 200) {
       ads.value = response.data.obj;
       ads.value.forEach((ad) => {
@@ -92,15 +97,14 @@ const fetchAds = async () => {
   }
 };
 
-const deleteAd = (adId, userid) => {
-  if (userid.toString() === userId){
-    _deleteAd(adId);
-  }
-}
-const _deleteAd = async (adId) => {
+const deleteAd = async (adId) => {
   try {
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: localStorage.getItem('token')
+    }
     console.log(adId);
-    const resp = await axios.delete(`http://192.168.1.109:8091/ads/delete?ad_id=${adId}`);
+    const resp = await axios.delete(`http://localhost:8091/ads/delete?ad_id=${adId}`,{headers});
     location.reload()
   }catch (error){
     console.error('ErrorDelete',error)
@@ -110,8 +114,12 @@ const _deleteAd = async (adId) => {
 
 const fetchPicturesForAd = async (adId) => {
   try {
-    const url = `http://192.168.1.109:8091/picture/get/first?ad_id=${adId}`;
-    const response = await axios.get(url);
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: localStorage.getItem('token')
+    }
+    const url = `http://localhost:8091/picture/get/first?ad_id=${adId}`;
+    const response = await axios.get(url,{headers});
     if (response.status === 200  && response.data.obj) {
       const adIndex = ads.value.findIndex(ad => ad.adId === adId);
       if (adIndex !== -1) {

@@ -6,8 +6,9 @@
   <div class="navbar">
     <div>
       <a class="button" href="mainpage">Home</a>
-      <a class="button" href="#browse">Browse Ads</a>
+<!--      <a class="button" href="#browse">Browse Ads</a>-->
       <a class="button" href="adpost">Post Ad</a>
+      <a v-if="userRole === 2" class="button" href="manage">Manage User</a>
     </div>
     <div style="display: flex; flex-direction: row">
       <label class="username"><a>Hi, {{userName}}</a></label>
@@ -25,6 +26,8 @@ const userName = ref('')
 const userAvatar = ref('')
 
 const router = useRouter()
+
+const userRole = ref(0);
 const logout = () => {
   localStorage.clear();
   router.push('/login')
@@ -33,6 +36,7 @@ const logout = () => {
 onMounted(() => {
   userName.value = localStorage.getItem("userName")
   userAvatar.value = localStorage.getItem("userAvatar")
+  userRole.value = parseInt(localStorage.getItem('role'));
 })
 </script>
 

@@ -19,7 +19,6 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
-import Navbar from "@/App.vue";
 import axios from "axios";
 import router from "@/router";
 const username = ref('');
@@ -29,13 +28,25 @@ const sendRequest = async () => {
   const payload = { username: username.value, password: password.value };
   
   try {
-    const response = await axios.post('http://192.168.1.109:8091/board/login', payload);
+    const response = await axios.post('http://localhost:8091/board/login', payload);
     if (response.status === 200 ) {
-      localStorage.setItem('userId',response.data.obj.userId)
-      localStorage.setItem('userName',response.data.obj.username);
-      localStorage.setItem('userAvatar', response.data.obj.avatarBase64);
-      console.log(localStorage.getItem('userId'));
-      //window.location.href = 'MainPage'
+      const _token = "Bearer "+response.data.obj;
+      localStorage.setItem('token', _token);
+
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: _token
+      }
+      const userResp = await axios.get('http://localhost:8091/board/home' ,{ headers })
+      localStorage.setItem('role',userResp.data.obj.role);
+      localStorage.setItem('userName',userResp.data.obj.username);
+      localStorage.setItem('userAvatar', userResp.data.obj.avatarBase64);
+      const role = localStorage.getItem('role')
+      if (parseInt(role) == 2) {
+        // Redirect to admin dashboard
+        localStorage.setItem('AdminPremission', true);
+      }
+      
       router.push("mainpage");
     }
   } catch (error) {
@@ -48,7 +59,7 @@ const redirectToRegister = () => {
 };
 
 onMounted(() =>{
-  if (localStorage.getItem("userId")){
+  if (localStorage.getItem("token")){
    router.push("/mainpage") 
   }
 });

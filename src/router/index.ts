@@ -4,6 +4,8 @@ import Register from '@/components/page/Register.vue'
 import MainPage from "@/components/page/MainPage.vue";
 import AdDetails from "@/components/page/AdDetails.vue";
 import AdPostPage from "@/components/page/AdPostPage.vue";
+import AdminLogin from "@/components/page/AdminLogin.vue";
+import Manage from "@/components/page/Manage.vue";
 
 
 const routes = [
@@ -35,7 +37,18 @@ const routes = [
     path: '/adpost',
     name: 'AdPost',
     component: AdPostPage
+  },
+  {
+    path: '/adminlogin',
+    name: 'adminlogin',
+    component: AdminLogin
+  },
+  {
+    path: '/manage',
+    name: 'manage',
+    component: Manage
   }
+    
   
   
 ]

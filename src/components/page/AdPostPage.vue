@@ -43,7 +43,11 @@ const submitAdInfo = async () => {
   try {
     userId.value = localStorage.getItem("userId");
     adInfo.value.userId = userId.value;
-    const response = await axios.post('http://192.168.1.109:8091/ads/save', adInfo.value);
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: localStorage.getItem('token')
+    }
+    const response = await axios.post('http://localhost:8091/ads/save', adInfo.value,{headers});
     if (response.status === 200) {
       if (response.data.obj && response.data.obj.adId) {
         adId.value = response.data.obj.adId;
@@ -59,7 +63,6 @@ const submitAdInfo = async () => {
           .filter(image => !images.value.includes(image))
           .map(image => image.pictureId); // 假设 originalImages 包含带有 pictureId 的对象
       await deleteRemovedImages(removedImageIds);
-      // 处理被删除的图片（例如，发送删除请求到服务器）
 
     }
   } catch (error) {
@@ -70,11 +73,16 @@ const submitAdInfo = async () => {
 const uploadAddedImages = async (addedImages) => {
   for (const image of addedImages) {
     try {
-      await axios.post('http://192.168.1.109:8091/picture/save', {
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: localStorage.getItem('token')
+      }
+      await axios.post('http://localhost:8091/picture/save', {
         adId: adId.value,
         pictureBase64: image.base64,
         pictureId: null
-      });
+      },
+          {headers});
     } catch (error) {
       console.error('Error uploading image:', error);
     }
@@ -89,8 +97,11 @@ const deleteRemovedImages = async () => {
 
   for (const pictureId of removedImageIds) {
     try {
-      await axios.delete(`http://192.168.1.109:8091/picture/delete?picture_id=${pictureId}`);
-      //await axios.delete(`http://192.168.1.109:8091/picture/delete`, {data: { picture_id: pictureId }
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: localStorage.getItem('token')
+      }
+      await axios.delete(`http://localhost:8091/picture/delete?picture_id=${pictureId}`,{headers});
     } catch (error) {
       console.error('Error deleting image:', error);
     }
@@ -115,7 +126,11 @@ const onFileChange = (event) => {
 
 const getAdVo = async (adId) => {
   try {
-    const response = await axios.get(`http://192.168.1.109:8091/ads/user/get?ad_id=${adId}`);
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: localStorage.getItem('token')
+    }
+    const response = await axios.get(`http://localhost:8091/ads/user/get?ad_id=${adId}`,{headers});
     if (response.status === 200 && response.data.obj) {
       adInfo.value = { ...response.data.obj, userId: userId };
     }
@@ -125,7 +140,11 @@ const getAdVo = async (adId) => {
 };
 const fetchPictures = async (adId) => {
   try {
-    const response = await axios.get(`http://192.168.1.109:8091/picture/list?ad_id=${adId}`);
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: localStorage.getItem('token')
+    }
+    const response = await axios.get(`http://localhost:8091/picture/list?ad_id=${adId}`,{headers});
     if (response.data.stateCode === 200 && Array.isArray(response.data.obj)) {
       // 存储图片的 base64 字符串和对应的 pictureId
       images.value = response.data.obj.map(pic => ({
@@ -180,7 +199,7 @@ onMounted(() => {
   position: absolute;
   top: 0;
   right: 0;
-  background-color: red;
+  background-color: rgb(128, 128, 128);
   color: white;
   border: none;
   border-radius: 999%;

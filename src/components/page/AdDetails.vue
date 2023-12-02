@@ -45,7 +45,11 @@ const totalImage = computed(() => {
 
 const getAdVo = async (adId) => {
   try {
-    const response = await axios.get(`http://192.168.1.109:8091/ads/user/get?ad_id=${adId}`);
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: localStorage.getItem('token')
+    }
+    const response = await axios.get(`http://localhost:8091/ads/user/get?ad_id=${adId}`,{headers});
     return response.data.obj;
   } catch (error) {
     console.error('Error:', error);
@@ -54,7 +58,11 @@ const getAdVo = async (adId) => {
 
 const fetchPictures = async (adId) => {
   try {
-    const response = await axios.get(`http://192.168.1.109:8091/picture/list?ad_id=${adId}`);
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: localStorage.getItem('token')
+    }
+    const response = await axios.get(`http://localhost:8091/picture/list?ad_id=${adId}`,{headers});
     if (response.data.stateCode === 200 && Array.isArray(response.data.obj)) {
       // 清空之前的图片
       pictures.value = response.data.obj.map(pic => pic.pictureBase64);

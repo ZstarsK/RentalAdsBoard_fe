@@ -5,19 +5,35 @@
 <template>
   <div class="navbar">
     <div>
-      <a class="button" href="#home">Home</a>
+      <a class="button" href="mainpage">Home</a>
       <a class="button" href="#browse">Browse Ads</a>
-      <a class="button" href="#postad">Post Ad</a>
+      <a class="button" href="adpost">Post Ad</a>
     </div>
-    <div>
-      <span class="user-avatar"></span>
-      <a class="button" href="#login">Login/Register</a>
+    <div style="display: flex; flex-direction: row">
+      <label class="username"><a>Hi, {{userName}}</a></label>
+      <img class="user-avatar" :src="userAvatar">
+      <div class="button" @click="logout">Logout</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// Navbar logic goes here
+import {computed, onMounted, ref} from "vue";
+import {useRouter} from "vue-router";
+
+const userName = ref('')
+const userAvatar = ref('')
+
+const router = useRouter()
+const logout = () => {
+  localStorage.clear();
+  router.push('/login')
+}
+
+onMounted(() => {
+  userName.value = localStorage.getItem("userName")
+  userAvatar.value = localStorage.getItem("userAvatar")
+})
 </script>
 
 <style scoped>
@@ -28,13 +44,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 10px;
-  height: 35px;
+  height: 50px;
   position: sticky;
   top: 0;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
-.navbar a.button {
-  color: white;
-  padding: 8px 12px;
+.navbar .button {
+  color: black;
+  padding: 15px 12px;
   margin: 4px 2px;
   text-align: center;
   text-decoration: none;
@@ -42,16 +59,24 @@
   border: none;
   cursor: pointer;
 }
-.navbar a.button:hover {
+.navbar .button:hover {
   background-color: #66bfbf;
 }
 .user-avatar {
-  width: 30px;
-  height: 30px;
+  margin-top: 6px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   background: #ddd;
   display: inline-block;
   margin-right: 10px;
   vertical-align: middle;
+  
+}
+.username{
+  font-size: 30px;
+  padding-top: 10px;
+  padding-right: 20px;
+  
 }
 </style>

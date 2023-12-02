@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/components/page/Login.vue'
 import Register from '@/components/page/Register.vue'
 import MainPage from "@/components/page/MainPage.vue";
+import AdDetails from "@/components/page/AdDetails.vue";
+import AdPostPage from "@/components/page/AdPostPage.vue";
 
 
 const routes = [
@@ -23,8 +25,19 @@ const routes = [
     path: '/mainpage',
     name: 'MainPage',
     component: MainPage
+  },
+  {
+    path: '/addetails',
+    name: 'AdDetails',
+    component: AdDetails
+  },
+  {
+    path: '/adpost',
+    name: 'AdPost',
+    component: AdPostPage
   }
-  // ... 其他路由 ...
+  
+  
 ]
 
 const router = createRouter({

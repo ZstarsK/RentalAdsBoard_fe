@@ -93,7 +93,7 @@ const sendRequest = () => {
     role: role.value
   };
 
-  axios.post('http://192.168.1.109:8091/board/register', payload)
+  axios.post('/api/board/register', payload)
       .then(response => {
         if (response.status === 200) {
           alert('注册成功！');

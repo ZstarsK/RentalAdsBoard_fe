@@ -18,29 +18,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import {onMounted, ref} from 'vue';
 import Navbar from "@/App.vue";
+import axios from "axios";
+import router from "@/router";
 const username = ref('');
 const password = ref('');
 
-const sendRequest = () => {
+const sendRequest = async () => {
   const payload = { username: username.value, password: password.value };
-
-  fetch('http://localhost:8091/board/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .catch((error) => console.error('Error:', error));
+  
+  try {
+    const response = await axios.post('http://192.168.1.109:8091/board/login', payload);
+    if (response.status === 200 ) {
+      localStorage.setItem('userId',response.data.obj.userId)
+      localStorage.setItem('userName',response.data.obj.username);
+      localStorage.setItem('userAvatar', response.data.obj.avatarBase64);
+      console.log(localStorage.getItem('userId'));
+      //window.location.href = 'MainPage'
+      router.push("mainpage");
+    }
+  } catch (error) {
+    console.error('Error login:', error);
+  }
 };
 
 const redirectToRegister = () => {
   window.location.href = "register"; // 修改为你的注册页面 URL
 };
+
+onMounted(() =>{
+  if (localStorage.getItem("userId")){
+   router.push("/mainpage") 
+  }
+});
 </script>
 
 <style scoped>

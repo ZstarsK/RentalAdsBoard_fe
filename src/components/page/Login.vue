@@ -29,7 +29,7 @@ const sendRequest = async () => {
   
   try {
     const response = await axios.post('http://localhost:8091/board/login', payload);
-    if (response.status === 200 ) {
+    if (response.data.stateCode === 200 ) {
       const _token = "Bearer "+response.data.obj;
       localStorage.setItem('token', _token);
 

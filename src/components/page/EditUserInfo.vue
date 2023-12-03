@@ -1,6 +1,7 @@
 ﻿<template>
   <div>
-    <h1 class="title">Register</h1>
+    <Navbar/>
+    <h1 class="title">Edit User Info</h1>
     <div class="container">
       <form @submit.prevent="sendRequest">
         <label for="username"><b>Username</b></label>
@@ -20,7 +21,7 @@
         <div v-if="imageBase64">
           <img class="image-preview" :src="imageBase64" alt="Image preview">
         </div>
-        
+
         <div v-if="showPasswordError" class="error-message">
           Passwords mismatch
         </div>
@@ -28,7 +29,7 @@
         <button type="button" class="action-button" @click="fileInput.click()">Choose Avatar</button>
         <input type="file" ref="fileInput" @change="onFileChange" accept="image/*" style="display: none;">
 
-        <input type="submit" value="Register" class="action-button">
+        <input type="submit" value="Update Info" class="action-button">
       </form>
     </div>
   </div>
@@ -37,6 +38,7 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue';
 import axios from "axios";
+import Navbar from "@/components/Navbar.vue";
 
 const username = ref('');
 const email = ref('');
@@ -73,7 +75,8 @@ const createImage = (src) => {
     canvas.height = 250; // 示例高度
 
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    imageBase64.value = canvas.toDataURL('image/jpeg', 1); // 第二个参数是图片质量，范围从 0 到 1);
+    imageBase64.value = canvas.toDataURL('image/jpeg', 0.8); // 第二个参数是图片质量，范围从 0 到 1);
+    console.log(imageBase64.value);
   };
   img.src = src;
 };
@@ -82,22 +85,27 @@ const sendRequest = () => {
   if (passwordMismatch.value) {
     showPasswordError.value = true;
     return;
-  } 
+  }
   //console.log(base64.value)
   const payload = {
     username: username.value,
     email: email.value,
     password: password.value,
     avatarBase64: imageBase64.value,
-    role: role.value
   };
-
-  axios.post('http://localhost:8091/board/register', payload)
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: localStorage.getItem('token')
+  }
+  axios.put('http://localhost:8091/board/update', payload, {headers})
       .then(response => {
         if (response.status === 200) {
-          alert('注册成功！');
+          alert('用户信息更新成功！');
+          console.log(response)
+          localStorage.setItem('userName',response.data.obj.username);
+          localStorage.setItem('userAvatar', response.data.obj.avatarBase64);
           window.location.href = "Login"; // 修改为你的注册页面 URL
-          // 可以在这里添加重定向或其他逻辑
+
         } else {
           alert('注册失败，请重试。');
         }
@@ -126,7 +134,7 @@ const clearPasswordError = () => {
   background-color: #a6e3e9;
   margin: 0 auto;
   margin-top: 20px;
-  //border: 1px solid black;
+//border: 1px solid black;
   border-radius: 50px;
 }
 input[type=text], input[type=email], input[type=password] {

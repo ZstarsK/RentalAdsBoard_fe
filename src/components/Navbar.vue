@@ -1,8 +1,5 @@
-﻿<script setup lang="ts">
-
-</script>
-
-<template>
+﻿<template>
+  
   <div class="navbar">
     <div>
       <a class="button" href="mainpage">Home</a>
@@ -13,6 +10,7 @@
     <div style="display: flex; flex-direction: row">
       <label class="username"><a>Hi, {{userName}}</a></label>
       <img class="user-avatar" :src="userAvatar">
+      <div class="button" @click="edituserinfo">EditUserInfo</div>
       <div class="button" @click="logout">Logout</div>
     </div>
   </div>
@@ -31,6 +29,9 @@ const userRole = ref(0);
 const logout = () => {
   localStorage.clear();
   router.push('/login')
+}
+const edituserinfo = () => {
+  router.push('/edituserinfo')
 }
 
 onMounted(() => {

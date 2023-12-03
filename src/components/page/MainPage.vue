@@ -9,8 +9,12 @@
       <div class="ad-container">
         <div class="ad-card" v-for="ad in displayedAds" :key="ad.adId">
           <img v-if="ad.pictures && ad.pictures.length > 0" :src="ad.pictures[0]" alt="Ad Image">
-          <h3>{{ ad.title }}</h3>
-          <p>{{ ad.address }}</p>
+
+          <h1>{{ ad.title }}</h1>
+          <div class="location" style="text-align: center;">
+            <i class="bi bi-geo-alt-fill" style="padding-right: 6px"></i>
+            <span style="font-size: 20px">{{ ad.address }}</span>
+          </div>
           <p>{{ ad.description }}</p>
           <button class="action-button" @click="viewDetail(ad.adId)">View Details</button>
           <div v-if="userRole == 2 || ad.username === userName" class="editor">

@@ -47,11 +47,16 @@ const updateUser = async (user) => {
       Authorization: localStorage.getItem('token')
     }
     //user.role = parseInt(user.role)
-    console.log(user.role)
-    await axios.put(`http://localhost:8091/board/root/manage?role=${parseInt(user.role)}`, null, {headers});
-    
-    
-    alert('User updated');
+    const resp = await axios.put(`http://localhost:8091/board/root/manage?roleChanged=${parseInt(user.role)}&username=${user.username}`, null, {headers});
+    if (user.username === localStorage.getItem('userName')){
+      const _token = "Bearer "+resp.data.obj;
+      localStorage.setItem('token', _token);
+      if (parseInt(user.role) == 1){
+        localStorage.setItem('AdminPremission',false);
+        localStorage.setItem('role',1)
+        router.push('mainpage')
+      }
+    }
   } catch (error) {
     console.error('Error updating user:', error);
   }

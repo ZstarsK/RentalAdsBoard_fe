@@ -34,7 +34,7 @@ const handleLogin = async () => {
       const role = localStorage.getItem('role')
     if (parseInt(role) === 2) {
       // Redirect to admin dashboard
-      localStorage.setItem('AdminPremission', true);
+      localStorage.setItem('AdminPermission', true);
       router.push('manage');
     } else {
       console.log(response)

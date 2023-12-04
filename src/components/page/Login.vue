@@ -21,15 +21,24 @@
 import {onMounted, ref} from 'vue';
 import axios from "axios";
 import router from "@/router";
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
+
+
 const username = ref('');
 const password = ref('');
 
+
+
 const sendRequest = async () => {
+  
   const payload = { username: username.value, password: password.value };
   
   try {
     const response = await axios.post('http://localhost:8091/board/login', payload);
     if (response.data.stateCode === 200 ) {
+      NProgress.start();
       const _token = "Bearer "+response.data.obj;
       localStorage.setItem('token', _token);
 
@@ -43,11 +52,11 @@ const sendRequest = async () => {
       localStorage.setItem('userAvatar', userResp.data.obj.avatarBase64);
       const role = localStorage.getItem('role')
       if (parseInt(role) == 2) {
-        // Redirect to admin dashboard
-        localStorage.setItem('AdminPremission', true);
+        localStorage.setItem('AdminPermission', String(true));
       }
       
       router.push("mainpage");
+      NProgress.done();
     }
   } catch (error) {
     console.error('Error login:', error);
@@ -66,6 +75,8 @@ onMounted(() =>{
 </script>
 
 <style scoped>
+
+
 .title {
   text-align: center;
   margin-top: 70px;
@@ -75,9 +86,7 @@ onMounted(() =>{
   width: 500px;
   padding: 40px;
   background-color: #a6e3e9;
-  margin: 10px auto;
-  margin-top: 20px;
-  //border: 1px solid black;
+  margin: 20px auto 10px;
   border-radius: 50px;
 }
 input[type=text], input[type=password] {

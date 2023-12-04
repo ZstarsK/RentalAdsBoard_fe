@@ -19,7 +19,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="js">
 import axios from 'axios';
 import {computed, onMounted, ref} from 'vue';
 import router from "@/router";
@@ -52,7 +52,7 @@ const updateUser = async (user) => {
       const _token = "Bearer "+resp.data.obj;
       localStorage.setItem('token', _token);
       if (parseInt(user.role) == 1){
-        localStorage.setItem('AdminPremission',false);
+        localStorage.setItem('AdminPermission',false);
         localStorage.setItem('role',1)
         router.push('mainpage')
       }
@@ -63,7 +63,7 @@ const updateUser = async (user) => {
 };
 
 onMounted(() => {
-  if (!localStorage.getItem("AdminPremission")){
+  if (!localStorage.getItem("AdminPermission")){
     alert("No permission!!!")
     router.push('/login')
   }

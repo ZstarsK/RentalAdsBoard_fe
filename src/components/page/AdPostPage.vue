@@ -24,6 +24,8 @@ import axios from 'axios';
 import Navbar from '@/components/Navbar.vue';
 import {useRoute} from "vue-router";
 import router from "@/router";
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 
 const route = useRoute();
 const adId = ref(route.query.ad_id) || null;
@@ -167,10 +169,12 @@ const removeImage = (index) => {
 
 onMounted(() => {
   if (adId.value) {
+    NProgress.start();
     getAdVo(adId.value);
     fetchPictures(adId.value).then(() => {
       originalImages.value = [...images.value]; // 存储原始图片列表
     });
+    NProgress.done();
   }
 });
 

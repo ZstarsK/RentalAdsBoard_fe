@@ -27,6 +27,8 @@ import {ref, onMounted, computed} from 'vue';
 import axios from 'axios';
 import Navbar from '@/components/Navbar.vue';
 import {useRoute} from "vue-router";
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 
 const route = useRoute();
 const adId = ref(route.query.ad_id);
@@ -78,10 +80,12 @@ const fetchPictures = async (adId) => {
 
 
 const updatePage = async () => {
+  NProgress.start();
   const adVo = await getAdVo(adId.value); // Dynamic adId can be passed here
   if (adVo) {
     adDetails.value = { ...adVo };
     await fetchPictures(adVo.adId);
+    NProgress.done();
   }
 };
 

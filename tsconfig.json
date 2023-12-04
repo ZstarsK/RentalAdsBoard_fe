@@ -6,6 +6,19 @@
     },
     {
       "path": "./tsconfig.app.json"
-    }
-  ]
+    },
+  ],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "./node_modules"
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "allowJs": true
+  }
 }

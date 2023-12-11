@@ -19,9 +19,9 @@
         <div class="ad-card" v-for="ad in displayedAds" :key="ad.adId">
           <img v-if="ad.pictures && ad.pictures.length > 0" :src="ad.pictures[0]" alt="Ad Image">
           
-          <div class="username-upper-right" style="display: flex; flex-direction: row; justify-content: right">
-            <i class="bi bi-person-fill" style="padding-right: 3px"></i>
-            <div >{{ ad.username }}</div>
+          <div class="username-upper-right" style="display: flex; flex-direction: row; justify-content: right"  @click="chatwith(ad.username)">
+            <i class="bi bi-telephone-fill" style="padding-right: 3px"></i>
+            <div>{{ ad.username }}</div>
           </div>
           
           <h1>{{ ad.title }}</h1>
@@ -81,6 +81,10 @@ const viewDetail = (adId) => {
 
 const editorDetail = (adId) => {
   router.push({name: 'AdPost', query: {ad_id: adId}});
+}
+
+const chatwith = (username) => {
+  router.push({name: 'chatroom',query:{target_username: username}});
 }
 
 const performSearch = async () => {

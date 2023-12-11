@@ -46,6 +46,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { NLayout, NLayoutSider, NLayoutContent, NCard, NList, NListItem, NAvatar, NInput, NButton } from 'naive-ui';
 import Navbar from "@/components/Navbar.vue";
 import axios from "axios";
+import {useRoute} from "vue-router";
 
 //const users = ref(['11','22']); // 在线用户列表
 const users = ref([]);
@@ -54,8 +55,9 @@ const messages = ref([]);
 const currentMessage = ref('');
 let ws = null; // WebSocket 实例
 const username = localStorage.getItem("userName")
-const targetUsername = ref("")
 const myAvatar = ref(localStorage.getItem("userAvatar"))
+const route = useRoute();
+const target_username = ref(route.query.target_username);
 
 // 创建 WebSocket 连接
 const createWebSocketConnection = (targetUsername) => {
@@ -63,7 +65,9 @@ const createWebSocketConnection = (targetUsername) => {
   
 };
 
-
+onMounted(() => {
+  getTargetUserInfo(target_username.value);
+});
 
 // 在组件卸载时关闭 WebSocket 连接
 onUnmounted(() => {
@@ -72,6 +76,15 @@ onUnmounted(() => {
   }
 });
 
+const getTargetUserInfo = async (target_username) => {
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: localStorage.getItem('token')
+  };
+  const response = await axios.get(`http://localhost:8091/board/home?username=${target_username}`, { headers });
+  const _target = response.data.obj;
+  selectUser(_target);
+}
 
 // 选择用户进行聊天
 const selectUser = async (user) => {
@@ -81,7 +94,6 @@ const selectUser = async (user) => {
   selectedUser.value = user;
   messages.value = []; // 清空当前消息数组
   createWebSocketConnection(user.username); // 创建与新用户的 WebSocket 连接
-
   
   // 获取与选中用户的历史聊天记录
   try {

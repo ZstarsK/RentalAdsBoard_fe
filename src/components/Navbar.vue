@@ -5,6 +5,7 @@
       <a class="button" href="mainpage">Home</a>
 <!--      <a class="button" href="#browse">Browse Ads</a>-->
       <a class="button" href="adpost">Post Ad</a>
+      <a class="button" href="chatroom">Chat</a>
       <a v-if="userRole === 2" class="button" href="manage">Manage User</a>
     </div>
     <div style="display: flex; flex-direction: row">
@@ -52,6 +53,7 @@ onMounted(() => {
   height: 50px;
   position: sticky;
   top: 0;
+  z-index: 2000;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
 .navbar .button {

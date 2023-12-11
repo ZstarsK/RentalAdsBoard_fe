@@ -1,6 +1,7 @@
 ﻿import AdDetails from "@/components/page/AdDetails.vue";
 import AdminLogin from "@/components/page/AdminLogin.vue";
 import AdPostPage from "@/components/page/AdPostPage.vue";
+import ChatRoom from "@/components/page/ChatRoom.vue";
 import EditUserInfo from "@/components/page/EditUserInfo.vue";
 import Login from '@/components/page/Login.vue'
 import MainPage from "@/components/page/MainPage.vue";
@@ -53,6 +54,11 @@ const routes = [
         path: '/edituserinfo',
         name: 'edituserinfo',
         component: EditUserInfo
+    },
+    {
+        path:'/chatroom',
+        name: 'chatroom',
+        component: ChatRoom
     }
 
 

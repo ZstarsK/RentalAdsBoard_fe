@@ -16,30 +16,52 @@
         <button @click="updateUser(user)">Update</button>
       </div>
     </div>
+    <div class="pagination-buttons">
+      <button @click="previousPage" class="page-button"> &lt;</button>
+      <button @click="nextPage" class="page-button"> &gt;</button>
+    </div>
     </div>
 </template>
 
-<script setup lang="js">
+<script setup>
 import axios from 'axios';
 import {computed, onMounted, ref} from 'vue';
 import router from "@/router";
 import Navbar from "@/components/Navbar.vue";
+const currentPage = ref(0);
+const maxPage = ref(1);
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
 
 const users = ref([]);
 
 onMounted(async () => {
+  if (!localStorage.getItem("AdminPermission")){
+    alert("No permission!!!")
+    router.push('/login')
+  }else {
+    fetchUsers();
+  }
+});
+
+const fetchUsers = async () => {
+  NProgress.start();
   try {
     const headers = {
       'Content-Type': 'application/json',
       Authorization: localStorage.getItem('token')
+    };
+    const response = await axios.get(`http://localhost:8091/board/root?page_number=${currentPage.value}&size=10`, { headers });
+    if (response.status === 200) {
+      maxPage.value = response.data.obj.totalPages;
+      users.value = response.data.obj.voList;
     }
-    const response = await axios.get('http://localhost:8091/board/root',{headers});
-    users.value = response.data.obj;
   } catch (error) {
     console.error('Error fetching users:', error);
+  } finally {
+    NProgress.done();
   }
-});
-
+};
 const updateUser = async (user) => {
   try {
     const headers = {
@@ -62,12 +84,19 @@ const updateUser = async (user) => {
   }
 };
 
-onMounted(() => {
-  if (!localStorage.getItem("AdminPermission")){
-    alert("No permission!!!")
-    router.push('/login')
+const nextPage = () => {
+  if (currentPage.value < maxPage.value - 1) {
+    currentPage.value++;
+    fetchUsers();
   }
-})
+};
+
+const previousPage = () => {
+  if (currentPage.value > 0) {
+    currentPage.value--;
+    fetchUsers();
+  }
+};
 
 
 // Add similar functions for ad management
@@ -122,4 +151,30 @@ onMounted(() => {
 .user-item button:hover, .ad-item button:hover {
   background-color: #218838;
 }
+.pagination-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-button {
+  background-color: #0f9df8;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  margin: 5px;
+  border-radius: 50%; /* 圆形按钮 */
+  cursor: pointer;
+  font-size: 20px;
+  width: 40px; /* 按钮宽度 */
+  height: 40px; /* 按钮高度 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-button:hover {
+  background-color: #0a84d3;
+}
+
 </style>

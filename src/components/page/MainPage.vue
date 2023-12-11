@@ -2,15 +2,24 @@
   <div class="main-container">
     <Navbar/>
     <div class="content">
+<!--      Search bar -->
       <div class="search-bar-container">
-        <input type="text" class="search-bar" placeholder="Search ads...">
+        <n-input-group class="input-group-rounded">
+          <n-input
+              v-model:value="searchQuery"
+              placeholder="Search..."
+              class="search-input"
+              @keydown.enter="performSearch"
+          />
+          <i class="bi bi-search search-button" @click="performSearch"></i>
+        </n-input-group>
       </div>
 
       <div class="ad-container">
         <div class="ad-card" v-for="ad in displayedAds" :key="ad.adId">
           <img v-if="ad.pictures && ad.pictures.length > 0" :src="ad.pictures[0]" alt="Ad Image">
           
-          <div class="username-upper-right" style="display: flex;flex-direction: row">
+          <div class="username-upper-right" style="display: flex; flex-direction: row; justify-content: right">
             <i class="bi bi-person-fill" style="padding-right: 3px"></i>
             <div >{{ ad.username }}</div>
           </div>
@@ -30,43 +39,39 @@
       </div>
 
       <div class="pagination-buttons">
-        <button v-if="hasLessAds" @click="previousPage" class="page-button"> &lt;</button>
-        <button v-if="hasMoreAds" @click="nextPage" class="page-button"> &gt;</button>
+        <button @click="previousPage" class="page-button"> &lt;</button>
+        <button @click="nextPage" class="page-button"> &gt;</button>
       </div>
     </div>
-
   </div>
 </template>
 
-<script setup lang="js">
+<script setup>
 import axios from 'axios';
 import {onMounted, ref, computed} from 'vue';
 import Navbar from '@/components/Navbar.vue';
 import {useRouter} from "vue-router";
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
+import { NInputGroup, NInput, NButton } from 'naive-ui';
+import async from "async";
+
+const searchQuery = ref('');
 
 const ads = ref([]);
-const currentPage = ref(1);
-const pageSize = 5;
+const currentPage = ref(0);
+//const pageSize = 5;
+const maxPage = ref(1)
 const userName = localStorage.getItem('userName');
 
 const userRole = ref(0);
-//const userId = localStorage.getItem("userId");
 
 
 const displayedAds = computed(() => {
-  const startIndex = (currentPage.value - 1) * pageSize;
-  return ads.value.slice(startIndex, startIndex + pageSize);
+  const startIndex = 0;
+  return ads.value.slice(0, 5);
 });
 
-const hasMoreAds = computed(() => {
-  return ads.value.length > currentPage.value * pageSize;
-});
-
-const hasLessAds = computed(() => {
-  return currentPage.value > 1
-});
 
 const router = useRouter();
 
@@ -78,6 +83,24 @@ const editorDetail = (adId) => {
   router.push({name: 'AdPost', query: {ad_id: adId}});
 }
 
+const performSearch = async () => {
+
+  // 可以在这里发送 GET 请求
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: localStorage.getItem('token')
+  }
+  const resp = await axios.get(`http://localhost:8091/ads/search?Key=${searchQuery.value}&page_number=${currentPage.value}&size=5`,
+      {headers});
+  if (resp.status === 200) {
+    ads.value = resp.data.obj.voList;
+    ads.value.forEach((ad) => {
+      fetchPicturesForAd(ad.adId);
+    });
+    maxPage.value = resp.data.obj.totalPages;
+  }
+};
+
 onMounted(() => {
 
   if (!localStorage.getItem("token")) {
@@ -87,9 +110,9 @@ onMounted(() => {
   } else {
     NProgress.start();
     userRole.value = parseInt(localStorage.getItem('role'));
+    currentPage.value = 0;
     fetchAds();
     NProgress.done();
-    
   }
 
 });
@@ -100,12 +123,13 @@ const fetchAds = async () => {
       'Content-Type': 'application/json',
       Authorization: localStorage.getItem('token')
     }
-    const response = await axios.get('http://localhost:8091/ads/home', {headers});
+    const response = await axios.get(`http://localhost:8091/ads/index/get?page_number=${currentPage.value}&size=5`, {headers});
     if (response.status === 200) {
-      ads.value = response.data.obj;
+      ads.value = response.data.obj.voList;
       ads.value.forEach((ad) => {
         fetchPicturesForAd(ad.adId);
       });
+      maxPage.value = response.data.obj.totalPages;
     }
   } catch (error) {
     console.error('Error fetching ads:', error);
@@ -118,7 +142,6 @@ const deleteAd = async (adId) => {
       'Content-Type': 'application/json',
       Authorization: localStorage.getItem('token')
     }
-    console.log(adId);
     const resp = await axios.delete(`http://localhost:8091/ads/delete?ad_id=${adId}`, {headers});
     location.reload()
   } catch (error) {
@@ -147,16 +170,25 @@ const fetchPicturesForAd = async (adId) => {
 };
 
 const nextPage = () => {
-  if (hasMoreAds.value) {
+  if (currentPage.value < maxPage.value - 1) {
     currentPage.value++;
-    window.scrollTo(0, 0);
+    if (searchQuery.value != null){
+      performSearch()
+    }else {
+      fetchAds();
+    }
+    
   }
 };
 
 const previousPage = () => {
-  if (currentPage.value > 1) {
+  if (currentPage.value > 0) {
     currentPage.value--;
-    window.scrollTo(0, 0);
+    if (searchQuery.value === ""){
+      performSearch()
+    }else {
+      fetchAds();
+    }
   }
 };
 
@@ -255,4 +287,32 @@ const previousPage = () => {
   text-align: right;
 }
 
+.search-bar-container {
+  position: relative;
+  width: 200px; /* 初始宽度 */
+  transition: width 0.3s ease-in-out;
+}
+
+.search-bar-container:hover,
+.search-bar-container:focus-within {
+  width: 100%; /* 鼠标悬浮或聚焦时的宽度 */
+  border-radius: 50px;
+}
+
+.search-input {
+  width: 100%;
+  transition: width 0.3s ease-in-out;
+  position: relative;
+}
+
+
+.search-button {
+  position: absolute;
+  right: 17px;
+  top: 50%;
+  border: none;
+  background: none;
+  transform: translateY(-50%);
+
+}
 </style>

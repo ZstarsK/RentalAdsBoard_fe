@@ -110,7 +110,7 @@ const selectUser = async (user) => {
   ws.onmessage = (event) => {
     const messageData = JSON.parse(event.data);
     messages.value.push({
-      content: messageData.content,
+      content: messageData,
       fromSelf: false
     });
   };

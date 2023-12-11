@@ -21,7 +21,7 @@
         <n-card v-if="selectedUser" :title="`Chat with ${selectedUser.username}`" :bordered="false" style="height: calc(100vh - 120px);">
           <!-- 聊天内容 -->
           <div class="chat-content" style="overflow-y: auto; height: calc(100% - 60px);">
-            <div v-for="message in messages" :key="message.id" :class="{ 'from-self': !message.fromSelf }" class="chat-message">
+            <div v-for="message in messages" :key="message.id" :class="{ 'from-self': message.fromSelf }" class="chat-message">
               <!-- 如果 message.fromSelf 为 true，则会添加 from-self 类 -->
               <n-avatar v-if="message.fromSelf" :src="myAvatar" class="avatar"></n-avatar>
               <n-avatar v-else :src="selectedUser.avatarBase64" class="avatar"></n-avatar>
@@ -60,22 +60,10 @@ const myAvatar = ref(localStorage.getItem("userAvatar"))
 // 创建 WebSocket 连接
 const createWebSocketConnection = (targetUsername) => {
   ws = new WebSocket(`ws://localhost:8091/websocket/${username}/${targetUsername}`);
-
   
-
-  ws.onerror = (event) => {
-    console.error('WebSocket error:', event);
-  };
-
-  ws.onclose = (event) => {
-    console.log('WebSocket connection closed:', event);
-  };
 };
 
-// 在组件挂载时创建 WebSocket 连接
-onMounted(() => {
-  //createWebSocketConnection();
-});
+
 
 // 在组件卸载时关闭 WebSocket 连接
 onUnmounted(() => {
@@ -94,6 +82,7 @@ const selectUser = async (user) => {
   messages.value = []; // 清空当前消息数组
   createWebSocketConnection(user.username); // 创建与新用户的 WebSocket 连接
 
+  
   // 获取与选中用户的历史聊天记录
   try {
     const headers = {
@@ -117,15 +106,28 @@ const selectUser = async (user) => {
   } catch (error) {
     console.error('Error fetching chat history:', error);
   }
-
-  // 接下来，您需要在 WebSocket 的 onmessage 事件处理函数中继续添加新消息
+  
+  ws.onmessage = (event) => {
+    const messageData = JSON.parse(event.data);
+    messages.value.push({
+      content: messageData.content,
+      fromSelf: false
+    });
+  };
 };
 
 // 发送消息
 const sendMessage = () => {
   if (currentMessage.value.trim() && selectedUser.value) {
+    const messageContent = currentMessage.value;
+
+    messages.value.push({
+      content: messageContent,
+      fromSelf: true
+    });
+    
     // 使用 WebSocket 发送消息
-    ws.send(JSON.stringify(currentMessage.value));
+    ws.send(JSON.stringify(messageContent));
 
     // 清空输入框
     currentMessage.value = '';
@@ -161,10 +163,10 @@ onMounted(() => {
   border-radius: 10px;
   word-break: break-word;
   align-items: center;
-
+  
 }
 .message {
-  max-width: 70%; /* 限制文本框最大宽度 */
+  word-break: break-word;
 }
 
 .chat-input {
@@ -187,7 +189,6 @@ onMounted(() => {
   height: 40px;
   border-radius: 50%;
   flex-shrink: 0;
-  /* 如果需要，可添加 margin */
 }
 
 </style>
